@@ -174,11 +174,13 @@ SQLALCHEMY_ECHO = get_env_var("SQLALCHEMY_ECHO", "") == "true"
 ```bash
 pip install -r requirements.txt
 ```
+
 ### 2. Set Up Alembic for Database Migrations
 
 ```bash
 alembic init -t async alembic
 ```
+
 Update alembic/env.py for Database URL from Settings
 
 ```bash
@@ -189,7 +191,9 @@ from src import settings
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URL)
 # ...
 ```
+
 Update src/db.py for Naming Conventions in Base Class
+
 ```bash
 # ...
 from sqlalchemy import MetaData
@@ -223,24 +227,61 @@ target_metadata = Base.metadata
 # ...
 
 ```
-Generate the Initial Migration
+
+Start the Database
+
 ```bash
+docker compose up -d postgres
+```
+
+**Note**: If you have postgres locally install on your machine it will be running on port 5432, So it is either you change the port number in the `docker-compose.yml` file or run
+
+```bash
+sudo systemctl stop postgresql
+```
+
+then start the database with docker.
+
+if you encounter a permission denied error with `var/db` folder run this command to fix it.
+
+```bash
+chmod -R 755 var/db
+```
+
+Generate the Initial Migration
+
+```bash
+docker compose run backend /bin/bash
+# Then run this inside the container
 alembic revision --autogenerate -m "Initial migration"
 ```
 
 ### 3. Run the Application with Docker Compose
-Start server and database with Docker Compose
+
+Firstly stop the postgres service
+
 ```bash
-docker compose up -d
+docker compose down postgres
 ```
+
+Then start and re-build server and database with Docker Compose
+
+```bash
+docker compose up --build -d
+```
+
 Watch the logs with
+
 ```bash
 docker compose logs -f
 ```
+
 Stop the containers with
+
 ```bash
 docker compose down
 ```
+
 Additional Resources
 For more details on setting up a FastAPI project with asynchronous SQLAlchemy, Alembic, PostgreSQL, and Docker, refer to this comprehensive guide: [Setup FastAPI Project with Async SQLAlchemy, Alembic, and Docker.](https://berkkaraal.com/blog/2024/09/19/setup-fastapi-project-with-async-sqlalchemy-2-alembic-postgresql-and-docker/)
 """
